@@ -1,0 +1,561 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kawaii Dino Phonics World</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;font-family:"Trebuchet MS",Arial,sans-serif;
+ color:#594d70;
+ background:linear-gradient(135deg,#fff2f8,#f2efff,#effaff);
+}
+header{
+ text-align:center;padding:25px 12px;
+ background:linear-gradient(120deg,#ffd5e8,#e5d9ff,#d5f1ff);
+}
+h1{font-size:clamp(26px,5vw,42px);margin:5px}
+nav{
+ display:flex;justify-content:center;gap:8px;flex-wrap:wrap;
+ padding:13px;background:#ffffffdc;position:sticky;top:0;z-index:5;
+}
+button{
+ border:0;border-radius:17px;padding:12px 17px;
+ background:#d8caff;color:#51436c;font-weight:bold;
+ cursor:pointer;box-shadow:0 4px 0 #b8a4e8;
+}
+button:hover{filter:brightness(1.03)}
+button:disabled{opacity:.5;cursor:not-allowed}
+nav button{background:white;box-shadow:0 3px 0 #e8dff0}
+nav button.active{background:#ffd5e8}
+main{max-width:900px;margin:22px auto;padding:0 13px 45px}
+.panel{
+ background:#ffffffdf;border:3px solid white;border-radius:25px;
+ padding:22px;margin-bottom:17px;
+ box-shadow:0 7px 24px #9f8bb51a;
+}
+.center{text-align:center}
+.hidden{display:none!important}
+.age-select,.answer-input{
+ padding:13px;border:2px solid #dfd2f4;border-radius:14px;
+ background:white;color:#594d70;
+}
+.age-select{width:100%;max-width:280px}
+.answer-input{width:100%;max-width:420px;text-align:center;margin:12px auto}
+.stat-row,.action-row{
+ display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:15px 0;
+}
+.stat{background:white;border-radius:14px;padding:10px 16px}
+.progress{height:12px;background:#eee6f7;border-radius:20px;overflow:hidden;margin:13px 0}
+.progress div{height:100%;background:#b8e9c8;width:0%;transition:width .3s}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:13px}
+.exercise-card{background:#fff0f7;border-radius:20px;padding:18px;text-align:center}
+.exercise-card:nth-child(2){background:#f0edff}
+.primary{background:#ffc9df;box-shadow:0 4px 0 #efa6c5}
+.blue{background:#cceeff;box-shadow:0 4px 0 #9ed3e9}
+.green{background:#c9f4d5;box-shadow:0 4px 0 #9bd7ad}
+.tag{display:inline-block;background:#fff0b5;border-radius:30px;padding:7px 13px;font-weight:bold}
+.question{text-align:center;max-width:650px;margin:auto}
+.prompt{font-size:clamp(21px,4vw,29px);line-height:1.4;margin:22px 0}
+.feedback{min-height:32px;font-weight:bold;margin:14px 0}
+.good{color:#25945c}.bad{color:#bd6580}
+.small{font-size:.88rem;color:#9186a4}
+.dino-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:13px}
+.dino-card{text-align:center;background:white;border-radius:18px;padding:12px;border:2px solid #f0e8f7}
+.dino-card img{width:100%;max-width:130px}
+.locked{opacity:.5;filter:grayscale(.8)}
+.result-stars{font-size:38px;letter-spacing:5px}
+@media(max-width:480px){.panel{padding:15px}nav button{padding:10px;font-size:13px}}
+</style>
+</head>
+<body>
+
+<header>
+ <div style="font-size:36px">🦕 🌸 🦖</div>
+ <h1>Kawaii Dino Phonics World</h1>
+ <p>Speak, learn, spell and collect cute dinosaurs!</p>
+</header>
+
+<nav>
+ <button class="active" data-page="home" onclick="showPage('home')">🏠 Home</button>
+ <button data-page="exercise" onclick="openExercise(1)">🌷 Exercise 1</button>
+ <button data-page="exercise" onclick="openExercise(2)">🌈 Exercise 2</button>
+ <button data-page="collection" onclick="showPage('collection')">🦖 Collection</button>
+</nav>
+
+<main>
+<section id="homePage">
+ <div class="panel center">
+  <h2>🌸 Welcome, little learner! 🌸</h2>
+  <p>Choose your age group:</p>
+  <select class="age-select" id="ageSelect" onchange="changeAge()">
+   <option value="3-5">Ages 3–5</option>
+   <option value="6-8" selected>Ages 6–8</option>
+   <option value="9-12">Ages 9–12</option>
+   <option value="13-17">Ages 13–17</option>
+  </select>
+  <div class="stat-row">
+   <div class="stat">⭐ Stars: <b id="stars">0</b></div>
+   <div class="stat">🦕 Dinosaurs: <b id="dinoCount">0/20</b></div>
+  </div>
+  <div class="progress"><div id="collectionProgress"></div></div>
+  <p class="small">Every 20 stars unlocks a dinosaur!</p>
+ </div>
+
+ <div class="grid">
+  <div class="exercise-card">
+   <div style="font-size:45px">🌷</div>
+   <h2>Exercise 1</h2>
+   <p>10 mixed speaking and spelling questions.</p>
+   <button class="primary" onclick="openExercise(1)">Start Exercise 1</button>
+  </div>
+  <div class="exercise-card">
+   <div style="font-size:45px">🌈</div>
+   <h2>Exercise 2</h2>
+   <p>A different set of 10 questions.</p>
+   <button class="primary" onclick="openExercise(2)">Start Exercise 2</button>
+  </div>
+ </div>
+ <div class="panel center">
+  <h3>✨ Each exercise contains</h3>
+  <p>🎤 3 phonics speaking questions</p>
+  <p>🌼 2 vowel speaking questions</p>
+  <p>🗣️ 2 complete-sentence speaking questions</p>
+  <p>✏️ 3 spelling questions with voice dictation</p>
+  <p class="small">Both exercises can be opened at any time.</p>
+ </div>
+</section>
+
+<section id="exercisePage" class="hidden">
+ <div class="panel">
+  <div class="stat-row">
+   <span class="tag" id="exerciseLabel">Exercise 1</span>
+   <span class="tag" id="categoryLabel">Phonics</span>
+  </div>
+  <div class="question">
+   <div id="questionNumber" class="small">Question 1 of 10</div>
+   <div class="progress"><div id="questionProgress"></div></div>
+   <div id="prompt" class="prompt"></div>
+   <div id="controls"></div>
+   <div id="feedback" class="feedback" aria-live="polite"></div>
+   <div class="action-row">
+    <button id="checkButton" class="primary" onclick="checkAnswer()">Check answer ✓</button>
+    <button id="nextButton" class="green hidden" onclick="nextQuestion()">Next ➜</button>
+   </div>
+  </div>
+ </div>
+ <div class="center"><button class="blue" onclick="showPage('home')">← Home</button></div>
+</section>
+
+<section id="resultPage" class="hidden">
+ <div class="panel center">
+  <div style="font-size:55px">🎉 🦕 🎉</div>
+  <h2>Exercise completed!</h2>
+  <p id="resultScore"></p>
+  <div id="resultStars" class="result-stars"></div>
+  <p id="resultMessage"></p>
+  <div id="rewardMessage"></div>
+  <div class="action-row">
+   <button class="primary" onclick="showPage('home')">Home</button>
+   <button class="blue" onclick="showPage('collection')">Dino Collection</button>
+   <button class="green" onclick="replayExercise()">Try Again</button>
+  </div>
+ </div>
+</section>
+
+<section id="collectionPage" class="hidden">
+ <div class="panel center">
+  <h2>🦖 My Dinosaur Collection</h2>
+  <p>Collect all 20 dinosaurs!</p>
+  <p>⭐ <b id="collectionStars">0</b> stars</p>
+  <p>🦕 <b id="collectionCount">0/20</b> unlocked</p>
+ </div>
+ <div class="dino-grid" id="dinoGrid"></div>
+ <div class="center" style="margin-top:18px">
+  <button class="blue" onclick="showPage('home')">← Home</button>
+ </div>
+</section>
+</main>
+
+<script>
+/* SAVED PROGRESS */
+const SAVE_KEY="kawaiiDinoPhonics_v4";
+function loadSave(){
+ try{
+  const x=JSON.parse(localStorage.getItem(SAVE_KEY));
+  if(x&&typeof x.stars==="number"&&Array.isArray(x.unlocked))return x;
+ }catch(e){}
+ return {stars:0,unlocked:[]};
+}
+let save=loadSave();
+function saveData(){
+ localStorage.setItem(SAVE_KEY,JSON.stringify(save));
+ updateStats();
+}
+
+/* AGE-APPROPRIATE WORDS */
+const words={
+ "3-5":["cat","dog","sun","map","pig","hat","bed","cup","bug","fox","jam","pen","red","box","fish","ship","shop","duck","sock","bell","moon","star","tree","frog","cake","ball","milk","hand","nest","rain"],
+ "6-8":["apple","banana","rabbit","sunshine","flower","window","pencil","basket","garden","yellow","monkey","rocket","pocket","chicken","shampoo","cheese","school","teacher","rainbow","planet","picnic","thunder","bridge","train","cloud","smile","crayon","dragon","brush","chair"],
+ "9-12":["adventure","discover","beautiful","important","journey","mystery","wonderful","remember","triangle","elephant","library","computer","imagine","whisper","different","language","calendar","curious","knowledge","volunteer","creative","mountain","environment","practice","excellent","champion","invisible","celebrate","solution","fantastic"],
+ "13-17":["communication","responsibility","extraordinary","concentration","opportunity","independent","environment","determination","imagination","pronunciation","architecture","consequence","appreciation","development","intelligence","achievement","investigation","perspective","enthusiasm","characteristic","civilisation","experiment","significant","technology","recommendation","confidence","accurate","literature","motivation","curiosity"]
+};
+
+const sentences={
+ "3-5":["The cat is sleeping.","I like my red ball.","The sun is hot.","My dog can run.","I see a big tree.","The duck can swim.","I have a blue cup.","The frog can jump.","I love my family.","The bird is singing."],
+ "6-8":["The little rabbit hops across the garden.","I enjoy reading a funny story.","The yellow butterfly landed on a flower.","My friends and I played after school.","The puppy wagged its tail happily.","We saw a rainbow after the rain.","The clever monkey climbed the tree.","I packed my books into my schoolbag.","The bright stars twinkled in the sky.","Our class planted seeds in the garden."],
+ "9-12":["The curious explorer discovered a hidden pathway.","Our team worked together to solve the puzzle.","The colourful festival attracted many visitors.","Reading regularly can improve your vocabulary.","The scientist carefully recorded the results.","A strong friendship is built on trust.","The unexpected storm changed our plans.","Every challenge gives us a chance to learn.","The young artist displayed her creative work.","Protecting nature is everyone's responsibility."],
+ "13-17":["Clear communication helps people understand different perspectives.","Consistent practice can strengthen pronunciation and confidence.","Technology has transformed the way people share information.","Responsible decisions require careful thought and consideration.","The investigation revealed several interesting discoveries.","Environmental protection requires cooperation from communities.","Creative thinking can lead to innovative solutions.","A balanced argument considers evidence from different viewpoints.","Learning a new language takes patience and persistence.","The presentation explained the importance of renewable energy."]
+};
+
+/* DINOSAURS */
+const dinos=[
+ ["Starry Spark","Magical","#a98bff"],["Moonbeam","Magical","#8ecbff"],
+ ["Princess Pudding","Magical","#ff9ecb"],["Rainbow Roar","Magical","#ffc66e"],
+ ["Crystal Cuddles","Magical","#a9e6dc"],["Twinkle Tail","Magical","#c8a4ff"],
+ ["Dreamy Dino","Magical","#ffb6d9"],["Comet Cutie","Magical","#8bd4ed"],
+ ["Magic Muffin","Magical","#f5b6a0"],["Galaxy Giggles","Magical","#b7a1f4"],
+ ["Bubbles","Normal","#8ed7c3"],["Pebbles","Normal","#a9c8ee"],
+ ["Nibbles","Normal","#f3b8a3"],["Wiggles","Normal","#b5d88f"],
+ ["Poppy","Normal","#f4a9c8"],["Doodle","Normal","#d5b5ed"],
+ ["Mochi","Normal","#f0d18d"],["Grumble","Silly","#a3a0ad"],
+ ["Muddy","Silly","#a98d7e"],["Goofy","Silly","#b2a4a4"]
+];
+
+function dinoSVG(color,i){
+ return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160">
+ <ellipse cx="100" cy="145" rx="65" ry="8" fill="#00000012"/>
+ <path d="M52 105 Q25 106 19 84 Q40 92 60 84" fill="${color}" stroke="#77658c" stroke-width="4"/>
+ <path d="M75 58 L69 37 L88 52 M120 55 L137 35 L133 62" fill="#fff0a8" stroke="#77658c" stroke-width="3"/>
+ <ellipse cx="101" cy="94" rx="55" ry="43" fill="${color}" stroke="#77658c" stroke-width="4"/>
+ <ellipse cx="145" cy="83" rx="30" ry="28" fill="${color}" stroke="#77658c" stroke-width="4"/>
+ <ellipse cx="154" cy="96" rx="18" ry="12" fill="#ffe4e9"/>
+ <circle cx="137" cy="76" r="5" fill="#443c58"/><circle cx="139" cy="74" r="2" fill="white"/>
+ <circle cx="161" cy="97" r="2.5" fill="#77658c"/>
+ <path d="M144 106 Q153 114 162 105" fill="none" stroke="#77658c" stroke-width="2.5"/>
+ <circle cx="80" cy="111" r="6" fill="#ffffff99"/><circle cx="102" cy="111" r="6" fill="#ffffff99"/>
+ <circle cx="124" cy="111" r="6" fill="#ffffff99"/>
+ <path d="M78 124 L73 143 L91 143 L96 126 M118 126 L122 143 L140 143 L135 121" fill="${color}" stroke="#77658c" stroke-width="4"/>
+ <circle cx="174" cy="55" r="5" fill="#ffd6e8"/>
+ <path d="M176 42 l3 7 7 3 -7 3 -3 7 -3 -7 -7 -3 7 -3z" fill="#ffe58a"/>
+ </svg>`;
+}
+function imageForDino(i){
+ return "data:image/svg+xml;charset=UTF-8,"+encodeURIComponent(dinoSVG(dinos[i][2],i));
+}
+
+/* QUESTION CREATION */
+let age="6-8",sets={1:[],2:[]},active=1,index=0,score=0,answered=false;
+let current=null,recognition=null,listening=false,spokenTranscript="";
+
+function shuffle(a){
+ let b=[...a];
+ for(let i=b.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}
+ return b;
+}
+function firstSound(w){
+ const blends=["sh","ch","th","wh","ph","bl","br","tr","cr","fl","gr","st","sp","pl","cl","dr","fr","sn","sm","sw","sl","gl","pr","tw"];
+ return blends.find(x=>w.toLowerCase().startsWith(x))||w[0].toLowerCase();
+}
+function firstVowel(w){return (w.toLowerCase().match(/[aeiou]/)||["a"])[0]}
+function makeDailySets(){
+ let pool={
+  phonics:shuffle(words[age].map(w=>({type:"phonics",word:w,answer:firstSound(w)}))),
+  vowels:shuffle(words[age].map(w=>({type:"vowels",word:w,answer:firstVowel(w)}))),
+  sentence:shuffle(sentences[age].map(s=>({type:"sentence",word:s,answer:s}))),
+  spelling:shuffle(words[age].map(w=>({type:"spelling",word:w,answer:w})))
+ };
+ function take(type,n){return pool[type].splice(0,n)}
+ sets[1]=shuffle([...take("phonics",3),...take("vowels",2),...take("sentence",2),...take("spelling",3)]);
+ sets[2]=shuffle([...take("phonics",3),...take("vowels",2),...take("sentence",2),...take("spelling",3)]);
+}
+function changeAge(){
+ age=document.getElementById("ageSelect").value;
+ makeDailySets();
+}
+
+/* PAGE NAVIGATION */
+function hidePages(){
+ ["homePage","exercisePage","resultPage","collectionPage"].forEach(id=>document.getElementById(id).classList.add("hidden"));
+}
+function showPage(p){
+ hidePages();
+ document.getElementById(p+"Page").classList.remove("hidden");
+ document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===p));
+ if(p==="collection")renderCollection();
+ updateStats();
+}
+function openExercise(n){
+ active=n;index=0;score=0;
+ currentQuestions=[...sets[n]];
+ hidePages();
+ document.getElementById("exercisePage").classList.remove("hidden");
+ document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.page==="exercise"));
+ document.getElementById("exerciseLabel").textContent="Exercise "+n;
+ renderQuestion();
+}
+let currentQuestions=[];
+
+function label(t){
+ return {phonics:"🎤 Phonics Speaking",vowels:"🌼 Vowel Speaking",sentence:"🗣️ Complete Sentence",spelling:"✏️ Spelling"}[t];
+}
+function renderQuestion(){
+ current=currentQuestions[index];answered=false;spokenTranscript="";
+ stopListening();
+ document.getElementById("questionNumber").textContent=`Question ${index+1} of 10`;
+ document.getElementById("questionProgress").style.width=(index*10)+"%";
+ document.getElementById("categoryLabel").textContent=label(current.type);
+ document.getElementById("feedback").textContent="";
+ document.getElementById("feedback").className="feedback";
+ document.getElementById("checkButton").classList.remove("hidden");
+ document.getElementById("nextButton").classList.add("hidden");
+ const prompt=document.getElementById("prompt");
+ const controls=document.getElementById("controls");
+
+ if(current.type==="phonics"){
+  prompt.textContent=`Listen to the sound "${current.answer}". Now say it!`;
+  controls.innerHTML=`
+   <div style="font-size:48px">🎤 🔤</div>
+   <p>Listen first, then repeat the sound into the microphone.</p>
+   <div class="action-row">
+    <button class="blue" onclick="speakText(current.answer)">🔊 Hear sound</button>
+    <button class="primary" onclick="startListening('phonics')">🎤 Say the sound</button>
+   </div>
+   <p id="speechStatus" class="small">Press the microphone when you are ready.</p>
+   <p id="heardText" class="small"></p>`;
+ }
+ if(current.type==="vowels"){
+  prompt.textContent=`Say the vowel sound in "${current.word}".`;
+  controls.innerHTML=`
+   <div style="font-size:48px">🌼 🎤</div>
+   <p>Look at the word. Say its vowel sound aloud.</p>
+   <div class="action-row">
+    <button class="blue" onclick="speakText(current.word)">🔊 Hear the word</button>
+    <button class="primary" onclick="startListening('vowels')">🎤 Say the vowel</button>
+   </div>
+   <p id="speechStatus" class="small">Press the microphone when ready.</p>
+   <p id="heardText" class="small"></p>`;
+ }
+ if(current.type==="sentence"){
+  prompt.textContent="Say this complete sentence clearly:";
+  controls.innerHTML=`
+   <div class="panel" style="background:#fff1f8;margin:12px auto">
+    <strong class="big">${escapeHTML(current.word)}</strong>
+   </div>
+   <div class="action-row">
+    <button class="blue" onclick="speakText(current.word)">🔊 Hear sentence</button>
+    <button class="primary" onclick="startListening('sentence')">🎤 Speak sentence</button>
+   </div>
+   <p id="speechStatus" class="small">Read the whole sentence into the microphone.</p>
+   <p id="heardText" class="small"></p>`;
+ }
+ if(current.type==="spelling"){
+  prompt.textContent="Listen carefully. Type the word you hear!";
+  controls.innerHTML=`
+   <div style="font-size:50px">🔊 🎧 ✏️</div>
+   <p>Press the speaker to hear the word.</p>
+   <div class="action-row">
+    <button class="blue" onclick="speakText(current.word)">🔊 Hear word</button>
+    <button onclick="speakText(current.word)">🔁 Hear again</button>
+   </div>
+   <input id="answerInput" class="answer-input" placeholder="Type the spelling here" autocomplete="off">`;
+ }
+}
+
+/* TEXT-TO-SPEECH */
+function speakText(text){
+ if(!("speechSynthesis" in window)){
+  alert("Voice playback is not supported by this browser.");
+  return;
+ }
+ speechSynthesis.cancel();
+ const u=new SpeechSynthesisUtterance(text);
+ u.lang="en-SG";u.rate=.8;
+ speechSynthesis.speak(u);
+}
+
+/* SPEECH RECOGNITION */
+function getRecognition(){
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR)return null;
+ const r=new SR();
+ r.lang="en-SG";
+ r.continuous=false;
+ r.interimResults=false;
+ r.maxAlternatives=3;
+ return r;
+}
+function stopListening(){
+ if(recognition){try{recognition.stop()}catch(e){}}
+ recognition=null;listening=false;
+}
+function startListening(type){
+ if(answered)return;
+ const status=document.getElementById("speechStatus");
+ const heard=document.getElementById("heardText");
+ const r=getRecognition();
+ if(!r){
+  status.textContent="Speech recognition is unavailable. Try Chrome on HTTPS or localhost.";
+  return;
+ }
+ stopListening();
+ recognition=r;listening=true;
+ status.textContent="🎤 Listening... Speak now!";
+ heard.textContent="";
+ r.onresult=(event)=>{
+  const results=event.results[0];
+  spokenTranscript=results[0].transcript.trim();
+  status.textContent="I heard you!";
+  heard.textContent="You said: "+spokenTranscript;
+  listening=false;
+ };
+ r.onerror=(event)=>{
+  status.textContent=event.error==="not-allowed"
+   ?"Please allow microphone access in your browser."
+   :"I couldn't hear that clearly. Please try again.";
+  listening=false;
+ };
+ r.onend=()=>{listening=false};
+ try{r.start()}catch(e){
+  status.textContent="Please try pressing the microphone again.";
+  listening=false;
+ }
+}
+
+/* ANSWER CHECKING */
+function clean(s){
+ return String(s).toLowerCase().trim()
+  .replace(/[.,!?;:]/g,"")
+  .replace(/\s+/g," ");
+}
+function checkAnswer(){
+ if(answered)return;
+ let correct=false;
+
+ if(current.type==="spelling"){
+  const value=document.getElementById("answerInput").value;
+  if(!value.trim()){feedback("Please type your answer first!",false);return}
+  correct=clean(value)===clean(current.answer);
+ }else{
+  if(!spokenTranscript){
+   feedback("Please use the microphone and say your answer first! 🎤",false);
+   return;
+  }
+  const heard=clean(spokenTranscript);
+  const expected=clean(current.answer);
+
+  if(current.type==="phonics"){
+   correct=heard===expected ||
+    heard.split(" ").includes(expected) ||
+    (expected.length===1 && heard===expected);
+  }
+  if(current.type==="vowels"){
+   correct=heard===expected ||
+    heard.includes(expected) ||
+    heard===({
+     a:"ay",e:"ee",i:"eye",o:"oh",u:"you"
+    }[expected]||expected);
+  }
+  if(current.type==="sentence"){
+   correct=heard===expected;
+  }
+ }
+ answered=true;
+ if(correct){
+  score++;
+  feedback("Amazing! That's correct! ⭐",true);
+ }else{
+  let answerText=current.type==="sentence"
+   ?"Try practising the sentence again."
+   :`The expected answer is "${current.answer}".`;
+  feedback("Good try! 💗 "+answerText,false);
+ }
+ stopListening();
+ document.getElementById("checkButton").classList.add("hidden");
+ document.getElementById("nextButton").classList.remove("hidden");
+}
+function feedback(message,good){
+ const el=document.getElementById("feedback");
+ el.textContent=message;
+ el.className="feedback "+(good?"good":"bad");
+}
+function nextQuestion(){
+ if(index<9){index++;renderQuestion()}
+ else finishExercise();
+}
+
+/* SCORING */
+function starsForScore(n){return n===10?3:n===9?2:n===8?1:0}
+function rewardType(n){return n>=9?"Magical":n>=6?"Normal":"Silly"}
+function unlockDino(type){
+ if(save.unlocked.length>=20)return null;
+ let i=dinos.findIndex((d,i)=>d[1]===type&&!save.unlocked.includes(i));
+ if(i<0)i=dinos.findIndex((d,i)=>!save.unlocked.includes(i));
+ if(i<0)return null;
+ save.unlocked.push(i);
+ return i;
+}
+function finishExercise(){
+ stopListening();
+ hidePages();
+ document.getElementById("resultPage").classList.remove("hidden");
+ document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.page==="home"));
+ const earned=starsForScore(score);
+ save.stars+=earned;
+ document.getElementById("resultScore").textContent=`You got ${score} out of 10 correct!`;
+ document.getElementById("resultStars").textContent=earned?"⭐".repeat(earned):"🌱";
+ document.getElementById("resultMessage").textContent=
+  score===10?"Perfect score! Amazing!":
+  score>=8?"Wonderful work! Keep going!":
+  "Great effort! Practise again and keep learning!";
+
+ const box=document.getElementById("rewardMessage");
+ box.innerHTML=earned?`You earned ${earned} star${earned===1?"":"s"}!`:"Keep practising to earn stars!";
+
+ let newDinos=[];
+ while(save.stars>=(save.unlocked.length+1)*20&&save.unlocked.length<20){
+  const i=unlockDino(rewardType(score));
+  if(i===null)break;
+  newDinos.push(i);
+ }
+ for(const i of newDinos){
+  box.innerHTML+=`<div class="panel" style="background:#fff2f8">
+   <h3>🎊 New dinosaur unlocked!</h3>
+   <img style="width:140px" src="${imageForDino(i)}" alt="${dinos[i][0]}">
+   <p><strong>${dinos[i][0]}</strong> — ${dinos[i][1]}</p>
+  </div>`;
+ }
+ if(!newDinos.length&&save.unlocked.length<20){
+  box.innerHTML+=`<p class="small">Your next dinosaur unlocks at ${(save.unlocked.length+1)*20} stars.</p>`;
+ }
+ saveData();
+}
+function replayExercise(){openExercise(active)}
+
+/* COLLECTION */
+function renderCollection(){
+ document.getElementById("collectionStars").textContent=save.stars;
+ document.getElementById("collectionCount").textContent=save.unlocked.length+"/20";
+ document.getElementById("dinoGrid").innerHTML=dinos.map((d,i)=>{
+  const owned=save.unlocked.includes(i);
+  return `<div class="dino-card ${owned?"":"locked"}">
+   <img src="${imageForDino(i)}" alt="${owned?d[0]:"Locked dinosaur"}">
+   <strong>${owned?d[0]:"Mystery Dino"}</strong>
+   <span class="small">${owned?d[1]:"🔒 Locked"}</span>
+  </div>`;
+ }).join("");
+}
+function updateStats(){
+ document.getElementById("stars").textContent=save.stars;
+ document.getElementById("dinoCount").textContent=save.unlocked.length+"/20";
+ document.getElementById("collectionProgress").style.width=(save.unlocked.length/20*100)+"%";
+}
+
+/* START */
+makeDailySets();
+updateStats();
+</script>
+</body>
+</html>
